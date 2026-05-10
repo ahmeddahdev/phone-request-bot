@@ -1,0 +1,24 @@
+name: Daily Phone Request
+on:
+  schedule:
+    # This runs at 13:15 UTC (approx 2:15 PM Lagos time)
+    - cron: '15 13 * * *'
+  workflow_dispatch: # Allows you to click a button to run it manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: pip install instagrapi pydantic
+
+      - name: Run bot
+        run: python beginner.py
