@@ -1,88 +1,55 @@
 import time
-import schedule
 import random
-import os
+from datetime import date
 from instagrapi import Client
 
-# Configuration
-SESSION_ID = "52735660042:BkMlC3EU623zdD:27:AYicvWkm-YzAsePSDPWH9PhQtmV7KuLEPHuf4az1Pw"
-
-# List of targets: [Instagram Username, Display Name for the message]
+# 1. Configuration
+SESSION_ID = "52735660042:9hwev80HgGe4CI:14:AYi11TOEjpRX_IfJnij0k33tyLGPo-fWR-pQhUHBHg"
 TARGETS = [
-    ["peller089 ", "Peller"],
-    ["imparkerburton ", "Parker Burton"]  # Replace 'jarvis_handle_here' with the actual username
+    ["peller089", "Peller"],
+    ["imparkerburton", "Parker Burton"]
 ]
 
-cl = Client()
+# 2. Date-Based Counter Logic (Starting May 10, 2026)
+START_DATE = date(2026, 5, 10) 
+today = date.today()
+day_count = (today - START_DATE).days + 1
 
+cl = Client()
 
 def login_with_session():
     print("--- Attempting Login via Session ID ---")
     try:
         cl.login_by_sessionid(SESSION_ID)
+        # Verify account
         me = cl.account_info().model_dump()
         print(f"Logged in successfully as: {me['username']}")
         return True
     except Exception as e:
-        print(f"CRITICAL ERROR: {e}")
+        print(f"CRITICAL ERROR during login: {e}")
         return False
 
+def send_dms():
+    print(f"\n--- Starting Batch for Day {day_count} ---")
+    
+    for username, display_name in TARGETS:
+        try:
+            target = username.strip()
+            user_id = cl.user_id_from_username(target)
 
-def send_daily_dm(is_test=False):
-    if not is_test:
-        # Random wait between 1 and 60 minutes for the whole batch
-        wait_seconds = random.randint(60, 3600)
-        print(f"\nSchedule triggered! Waiting {wait_seconds // 60} minutes for stealth...")
-        time.sleep(wait_seconds)
-    else:
-        print("\n--- Running Initial Test Send ---")
+            message = f"Day {day_count} of asking {display_name} for a new phone. 🙏📱"
 
-    # Handle the counter
-    if not os.path.exists("counter.txt"):
-        with open("counter.txt", "w") as f: f.write("0")
+            cl.direct_send(message, [user_id])
+            print(f"SUCCESS: Sent to {display_name} (@{target})")
 
-    try:
-        with open("counter.txt", "r+") as f:
-            content = f.read().strip()
-            day = int(content) + 1 if content else 1
-            f.seek(0);
-            f.write(str(day));
-            f.truncate()
+            # Small 5-12 second gap to stay stealthy between users
+            time.sleep(random.randint(5, 12))
 
-        # Loop through both Peller and Jarvis
-        for username, display_name in TARGETS:
-            try:
-                user_id = cl.user_id_from_username(username)
+        except Exception as e:
+            print(f"Failed to send to {display_name}: {e}")
 
-                # Personalized message
-                message = f"Day {day} of asking {display_name} for a new phone. 🙏📱"
+    print(f"Batch completed for Day {day_count}.")
 
-                cl.direct_send(message, [user_id])
-                print(f"SUCCESS: Sent to {display_name} (@{username})")
-
-                # Small 5-10 second gap between sending to the two people
-                # This makes the behavior look more 'human'
-                time.sleep(random.randint(5, 12))
-
-            except Exception as e:
-                print(f"Failed to send to {display_name}: {e}")
-
-        print(f"Batch completed for Day {day}.")
-
-    except Exception as e:
-        print(f"Counter/System Error: {e}")
-
-
-# --- EXECUTION ---
-if login_with_session():
-    # 1. SEND IMMEDIATELY ON RUN
-    send_daily_dm(is_test=True)
-
-    # 2. SCHEDULE FOR THE FUTURE
-    # It will wake up at 1:15 PM daily, then wait its random delay
-    schedule.every().day.at("13:15").do(send_daily_dm)
-
-    print(f"\nBot is active for {', '.join([t[1] for t in TARGETS])}.")
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+if __name__ == "__main__":
+    if login_with_session():
+        send_dms()
