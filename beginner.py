@@ -4,7 +4,7 @@ from datetime import date
 from instagrapi import Client
 
 # 1. Configuration
-SESSION_ID = "52735660042:9hwev80HgGe4CI:14:AYi11TOEjpRX_IfJnij0k33tyLGPo-fWR-pQhUHBHg"
+SESSION_ID = "52735660042:LgCIh4N4nUfX8h:18:AYiPkKtV7mg3rsJd-7e4M6a5pPs7MnC4csN6P1iR9A"
 TARGETS = [
     ["peller089", "Peller"],
     ["imparkerburton", "Parker Burton"]
