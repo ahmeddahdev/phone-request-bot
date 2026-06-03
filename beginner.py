@@ -8,7 +8,7 @@ TARGETS = [
     ["peller089", "Peller"]
 ]
 
-START_DATE = date(2026, 5, 10) 
+START_DATE = date(2026, 5, 13)
 today = date.today()
 day_count = (today - START_DATE).days + 1
 
